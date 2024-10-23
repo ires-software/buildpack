@@ -334,8 +334,40 @@ install_bins() {
   fi
 }
 
+
+install_mongocryptd() {
+  echo "Installing mongocryptd binary..."
+
+  # Create a directory for mongocryptd binary
+  MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
+  mkdir -p "$MONGOCRYPTD_DIR"
+
+  # Determine platform
+  if [[ "$(uname)" == "Darwin" ]]; then
+    OS="osx"
+  elif [[ "$(uname)" == "Linux" ]]; then
+    OS="linux"
+  else
+    echo "Unsupported OS: $(uname)"
+    exit 1
+  fi
+
+  # Download mongocryptd
+  MONGOCRYPTD_URL="https://downloads.mongodb.com/compass/mongocryptd-${OS}-x86_64-latest.tgz"
+  echo "Downloading mongocryptd from $MONGOCRYPTD_URL..."
+  curl -L "$MONGOCRYPTD_URL" | tar -xz -C "$MONGOCRYPTD_DIR"
+
+  # Set permissions
+  chmod +x "$MONGOCRYPTD_DIR/bin/mongocryptd"
+
+  # Add mongocryptd to PATH
+  export PATH="$MONGOCRYPTD_DIR/bin:$PATH"
+  echo "mongocryptd installed at $MONGOCRYPTD_DIR/bin/mongocryptd"
+}
+
 header "Installing binaries" | output "$LOG_FILE"
 install_bins | output "$LOG_FILE"
+install_mongocryptd | output "$LOG_FILE"
 
 if [[ -z "$USE_NPM_INSTALL" ]]; then
   if [[ "$(should_use_npm_ci "$BUILD_DIR")" == "true" ]]; then
