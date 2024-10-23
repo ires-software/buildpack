@@ -342,18 +342,8 @@ install_mongocryptd() {
   MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
   mkdir -p "$MONGOCRYPTD_DIR"
 
-  # Determine platform
-  if [[ "$(uname)" == "Darwin" ]]; then
-    OS="osx"
-  elif [[ "$(uname)" == "Linux" ]]; then
-    OS="linux"
-  else
-    echo "Unsupported OS: $(uname)"
-    exit 1
-  fi
-
   # Download mongocryptd
-  MONGOCRYPTD_URL="https://downloads.mongodb.com/compass/mongocryptd-${OS}-x86_64-latest.tgz"
+  MONGOCRYPTD_URL="https://downloads.mongodb.com/linux/mongodb-linux-x86_64-enterprise-ubuntu2404-8.0.1.tgz"
   echo "Downloading mongocryptd from $MONGOCRYPTD_URL..."
   curl -L "$MONGOCRYPTD_URL" | tar -xz -C "$MONGOCRYPTD_DIR"
 
