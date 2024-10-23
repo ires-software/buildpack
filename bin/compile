@@ -336,23 +336,46 @@ install_bins() {
 
 
 install_mongocryptd() {
-  echo "Installing mongocryptd binary..."
-
-  # Create a directory for mongocryptd binary
-  MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
-  mkdir -p "$MONGOCRYPTD_DIR"
-
-  # Download mongocryptd
   MONGOCRYPTD_URL="https://downloads.mongodb.com/linux/mongodb-linux-x86_64-enterprise-ubuntu2404-8.0.1.tgz"
-  echo "Downloading mongocryptd from $MONGOCRYPTD_URL..."
-  curl -L "$MONGOCRYPTD_URL" | tar -xz -C "$MONGOCRYPTD_DIR"
+  MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
+  TMP_DIR="/tmp/mongocryptd_install"
+  MONGOCRYPTD_BIN="$MONGOCRYPTD_DIR/bin/mongocryptd"
+  
+  mkdir -p "$TMP_DIR"
+  
+  echo "Downloading mongocryptd..."
+  curl -L "$MONGOCRYPTD_URL" -o "$TMP_DIR/mongocryptd.tgz"
+  
+  echo "Extracting mongocryptd..."
+  mkdir -p "$MONGOCRYPTD_DIR"
+  tar -xzf "$TMP_DIR/mongocryptd.tgz" -C "$MONGOCRYPTD_DIR" --strip-components=1
 
-  # Set permissions
-  chmod +x "$MONGOCRYPTD_DIR/mongodb-linux-x86_64-enterprise-ubuntu2404-8.0.1/bin/mongocryptd"
-
-  # Add mongocryptd to PATH
-  export PATH="$MONGOCRYPTD_DIR/mongodb-linux-x86_64-enterprise-ubuntu2404-8.0.1/bin:$PATH"
-  echo "mongocryptd installed at $MONGOCRYPTD_DIR/mongodb-linux-x86_64-enterprise-ubuntu2404-8.0.1/bin/mongocryptd"
+  if [ -f "$MONGOCRYPTD_BIN" ]; then
+      echo "mongocryptd installed successfully at $MONGOCRYPTD_BIN"
+  else
+      echo "Installation failed. Please check the logs."
+      exit 1
+  fi
+  
+  echo "Cleaning up..."
+  rm -rf "$TMP_DIR"
+  
+  if ! command -v mongocryptd &> /dev/null; then
+      echo "Adding mongocryptd to PATH..."
+      export PATH="$MONGOCRYPTD_DIR/bin:$PATH"
+      echo "export PATH=\"$MONGOCRYPTD_DIR/bin:\$PATH\"" >> ~/.bashrc
+      source ~/.bashrc
+  fi
+  
+  # Check if mongocryptd is working
+  echo "Verifying mongocryptd installation..."
+  mongocryptd --version
+  if [ $? -eq 0 ]; then
+      echo "mongocryptd installation complete!"
+  else
+      echo "Error: mongocryptd not functioning properly."
+      exit 1
+  fi
 }
 
 header "Installing binaries" | output "$LOG_FILE"
