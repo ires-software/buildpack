@@ -337,7 +337,7 @@ install_bins() {
 
 install_mongocryptd() {
   MONGOCRYPTD_URL="https://downloads.mongodb.com/linux/mongodb-linux-x86_64-enterprise-ubuntu2204-7.0.14.tgz"
-  MONGOCRYPTD_DIR="$BUILD_DIR/.scalingo/mongocryptd"
+  MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
   TMP_DIR="/tmp/mongocryptd_install"
   MONGOCRYPTD_BIN="$MONGOCRYPTD_DIR/bin/mongocryptd"
   
@@ -359,9 +359,15 @@ install_mongocryptd() {
   
   echo "Cleaning up..."
   rm -rf "$TMP_DIR"
+
+  test ! -d ".profile.d" && mkdir -p .profile.d || true
   
-  echo "Adding mongocryptd to PATH..."
-  echo "export PATH=\"/app/.scalingo/mongocryptd/bin:\$PATH\"" >> ~/.bashrc
+  cat > ".profile.d/node.sh" <<SH
+  mkdir -p /app/bin
+  cp $MONGOCRYPTD_DIR/bin/* /app/bin/
+SH
+
+  source ".profile.d/node.sh"
 }
 
 header "Installing binaries" | output "$LOG_FILE"
