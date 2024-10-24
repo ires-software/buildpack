@@ -359,15 +359,7 @@ install_mongocryptd() {
   
   echo "Cleaning up..."
   rm -rf "$TMP_DIR"
-
-  test ! -d ".profile.d" && mkdir -p .profile.d || true
-  
-  cat > ".profile.d/node.sh" <<SH
-  mkdir -p /app/bin
-  cp $MONGOCRYPTD_DIR/bin/* /app/bin/
-SH
-
-  source ".profile.d/node.sh"
+  rm "$MONGOCRYPTD_DIR/bin/mongos" "$MONGOCRYPTD_DIR/bin/mongod" "$MONGOCRYPTD_DIR/bin/mongokerberos" "$MONGOCRYPTD_DIR/bin/mongoldap"
 }
 
 header "Installing binaries" | output "$LOG_FILE"
