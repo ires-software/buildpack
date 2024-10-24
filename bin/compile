@@ -334,8 +334,54 @@ install_bins() {
   fi
 }
 
+
+install_mongocryptd() {
+  MONGOCRYPTD_URL="https://downloads.mongodb.com/linux/mongodb-linux-x86_64-enterprise-ubuntu2204-7.0.14.tgz"
+  MONGOCRYPTD_DIR="$BUILD_DIR/.scalingo/mongocryptd"
+  TMP_DIR="/tmp/mongocryptd_install"
+  MONGOCRYPTD_BIN="$MONGOCRYPTD_DIR/bin/mongocryptd"
+  
+  mkdir -p "$TMP_DIR"
+  
+  echo "Downloading mongocryptd..."
+  curl -L "$MONGOCRYPTD_URL" -o "$TMP_DIR/mongocryptd.tgz"
+  
+  echo "Extracting mongocryptd..."
+  mkdir -p "$MONGOCRYPTD_DIR"
+  tar -xzf "$TMP_DIR/mongocryptd.tgz" -C "$MONGOCRYPTD_DIR" --strip-components=1
+
+  if [ -f "$MONGOCRYPTD_BIN" ]; then
+      echo "mongocryptd installed successfully at $MONGOCRYPTD_BIN"
+  else
+      echo "Installation failed. Please check the logs."
+      exit 1
+  fi
+  
+  echo "Cleaning up..."
+  rm -rf "$TMP_DIR"
+  
+  if ! command -v mongocryptd &> /dev/null; then
+      echo "Adding mongocryptd to PATH..."
+      export PATH="$MONGOCRYPTD_DIR/bin:$PATH"
+      echo "export PATH=\"/app/.scalingo/mongocryptd/bin:\$PATH\"" >> ~/.bashrc
+      source ~/.bashrc
+  fi
+  
+  # Check if mongocryptd is working
+  echo "Verifying mongocryptd installation..."
+  cat ~/.bashrc
+  mongocryptd --version
+  if [ $? -eq 0 ]; then
+      echo "mongocryptd installation complete!"
+  else
+      echo "Error: mongocryptd not functioning properly."
+      exit 1
+  fi
+}
+
 header "Installing binaries" | output "$LOG_FILE"
 install_bins | output "$LOG_FILE"
+install_mongocryptd | output "$LOG_FILE"
 
 if [[ -z "$USE_NPM_INSTALL" ]]; then
   if [[ "$(should_use_npm_ci "$BUILD_DIR")" == "true" ]]; then
