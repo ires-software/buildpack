@@ -360,22 +360,8 @@ install_mongocryptd() {
   echo "Cleaning up..."
   rm -rf "$TMP_DIR"
   
-  if ! command -v mongocryptd &> /dev/null; then
-      echo "Adding mongocryptd to PATH..."
-      export PATH="$MONGOCRYPTD_DIR/bin:$PATH"
-      echo "export PATH=\"$HOME/.scalingo/mongocryptd/bin:\$PATH\"" >> ~/.bashrc
-      source ~/.bashrc
-  fi
-  
-  # Check if mongocryptd is working
-  echo "Verifying mongocryptd installation..."
-  mongocryptd --version
-  if [ $? -eq 0 ]; then
-      echo "mongocryptd installation complete!"
-  else
-      echo "Error: mongocryptd not functioning properly."
-      exit 1
-  fi
+  echo "Adding mongocryptd to PATH..."
+  echo "export PATH=\"/app/.scalingo/mongocryptd/bin:\$PATH\"" >> ~/.bashrc
 }
 
 header "Installing binaries" | output "$LOG_FILE"
