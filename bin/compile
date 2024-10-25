@@ -334,8 +334,37 @@ install_bins() {
   fi
 }
 
+
+install_mongocryptd() {
+  MONGOCRYPTD_URL="https://downloads.mongodb.com/linux/mongodb-linux-x86_64-enterprise-ubuntu2204-7.0.14.tgz"
+  MONGOCRYPTD_DIR="$BUILD_DIR/mongocryptd"
+  TMP_DIR="/tmp/mongocryptd_install"
+  MONGOCRYPTD_BIN="$MONGOCRYPTD_DIR/bin/mongocryptd"
+  
+  mkdir -p "$TMP_DIR"
+  
+  echo "Downloading mongocryptd..."
+  curl -L "$MONGOCRYPTD_URL" -o "$TMP_DIR/mongocryptd.tgz"
+  
+  echo "Extracting mongocryptd..."
+  mkdir -p "$MONGOCRYPTD_DIR"
+  tar -xzf "$TMP_DIR/mongocryptd.tgz" -C "$MONGOCRYPTD_DIR" --strip-components=1
+
+  if [ -f "$MONGOCRYPTD_BIN" ]; then
+      echo "mongocryptd installed successfully at $MONGOCRYPTD_BIN"
+  else
+      echo "Installation failed. Please check the logs."
+      exit 1
+  fi
+  
+  echo "Cleaning up..."
+  rm -rf "$TMP_DIR"
+  rm "$MONGOCRYPTD_DIR/bin/mongos" "$MONGOCRYPTD_DIR/bin/mongod" "$MONGOCRYPTD_DIR/bin/mongokerberos" "$MONGOCRYPTD_DIR/bin/mongoldap" "$MONGOCRYPTD_DIR/bin/mongodecrypt"
+}
+
 header "Installing binaries" | output "$LOG_FILE"
 install_bins | output "$LOG_FILE"
+install_mongocryptd | output "$LOG_FILE"
 
 if [[ -z "$USE_NPM_INSTALL" ]]; then
   if [[ "$(should_use_npm_ci "$BUILD_DIR")" == "true" ]]; then
